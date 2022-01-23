@@ -1,6 +1,7 @@
 #Initialize!!!
 import sys
 import time
+import numpy
 sys.path.insert(0, '../Secret')
 import Location
 
@@ -11,6 +12,7 @@ from pynput import keyboard
 
 #### Image Modules ####
 from PIL import Image, ImageGrab
+import cv2
 import pytesseract
 
 def on_press(key):
@@ -47,6 +49,23 @@ def clickCookie():
 
 #2. Click Golden Cookie 
 #3. Buy Upgrades
+def buyUpgrade():
+    Screen = ImageGrab.grab()
+    cropTop = 112
+    cropLeft = 2240
+    Screen = Screen.crop((cropLeft, cropTop, 2540, 1430))
+    #Screen.save("screen.png")
+    
+    pixels = [i for i in Screen.getdata()]
+
+    if (102, 255, 102) in pixels: #True if exists, False if it doesn't
+        upgrades = numpy.argwhere((numpy.array(Screen)==[102, 255, 102]).all(axis=2))
+        index = numpy.argmax(upgrades, axis=0)[1]
+        #print(upgrades)
+        print("x ", upgrades[index][1], " y ", upgrades[index][0])
+        mouse.position = (cropLeft + upgrades[index][1], cropTop + upgrades[index][0])
+        mouse.click(Button.left)
+
 #4. Read Text
 def readStory():
     global lastText
@@ -64,7 +83,8 @@ def readStory():
 Initalize()
 
 while(True):
-    clickCookie()
+    clickCookie() 
+    buyUpgrade()
     readStory()
 
 storyText.close()
