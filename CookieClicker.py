@@ -1,6 +1,7 @@
 #Initialize!!!
 import sys
 import time
+import threading
 import numpy
 sys.path.insert(0, '../Secret')
 import Location
@@ -12,7 +13,7 @@ from pynput import keyboard
 
 #### Image Modules ####
 from PIL import Image, ImageGrab
-import cv2
+#import cv2
 import pytesseract
 
 def on_press(key):
@@ -43,8 +44,10 @@ def Initalize():
 
 #1. Click Big Cookie
 def clickCookie():
-    mouse.position = cookiePos
-    mouse.click(Button.left)
+    while(True):
+        mouse.position = cookiePos
+        mouse.click(Button.left)
+        time.sleep(0.1)
 
 
 #2. Click Golden Cookie 
@@ -61,8 +64,6 @@ def buyUpgrade():
     if (102, 255, 102) in pixels: #True if exists, False if it doesn't
         upgrades = numpy.argwhere((numpy.array(Screen)==[102, 255, 102]).all(axis=2))
         index = numpy.argmax(upgrades, axis=0)[1]
-        #print(upgrades)
-        print("x ", upgrades[index][1], " y ", upgrades[index][0])
         mouse.position = (cropLeft + upgrades[index][1], cropTop + upgrades[index][0])
         mouse.click(Button.left)
 
@@ -82,8 +83,10 @@ def readStory():
 
 Initalize()
 
+cookieClicker = threading.Thread(target=clickCookie, daemon=True)
+cookieClicker.start()
+
 while(True):
-    clickCookie() 
     buyUpgrade()
     readStory()
 
