@@ -20,6 +20,8 @@ def on_press(key):
     if key == keyboard.Key.esc:
         print('esc pressed!')
         storyText.close()
+        grandmaText.close()
+        newsText.close()
         sys.exit()
         return False # Stop listener
 
@@ -38,9 +40,10 @@ def Initalize():
     cookiePos = pyautogui.position()
 
     ##Initalize
-    global lastText, storyText
+    global lastStory, storyText, grandmaText, newsText
     storyText = open('story.txt', 'a')
-    lastText = ""
+    grandmaText = open('grandma.txt', 'a+')
+    lastStory = ""
 
 #1. Click Big Cookie
 def clickCookie():
@@ -57,29 +60,33 @@ def buyUpgrade():
     cropTop = 112
     cropLeft = 2240
     Screen = Screen.crop((cropLeft, cropTop, 2540, 1430))
-    #Screen.save("screen.png")
     
     pixels = [i for i in Screen.getdata()]
-
-    if (102, 255, 102) in pixels: #True if exists, False if it doesn't
-        upgrades = numpy.argwhere((numpy.array(Screen)==[102, 255, 102]).all(axis=2))
-        index = numpy.argmax(upgrades, axis=0)[1]
-        mouse.position = (cropLeft + upgrades[index][1], cropTop + upgrades[index][0])
-        mouse.click(Button.left)
+    try :
+        pyautogui.click('Upgrade.PNG')
+    except:
+        if (102, 255, 102) in pixels : #True if exists, False if it doesn't
+            upgrades = numpy.argwhere((numpy.array(Screen)==[102, 255, 102]).all(axis=2))
+            index = numpy.argmax(upgrades, axis=0)[1]
+            mouse.position = (cropLeft + upgrades[index][1], cropTop + upgrades[index][0])
+            mouse.click(Button.left)
 
 #4. Read Text
 def readStory():
-    global lastText
+    global lastStory
     Screen = ImageGrab.grab()
     Screen = Screen.crop((890, 112, 2100, 200))
     pixels = [i for i in Screen.getdata()]
 
-    if (245, 246, 247) in pixels: #True if exists, False if it doesn't
+    if (245, 246, 247) in pixels: #True if pure white text, False if shifting text
         text = pytesseract.image_to_string(Screen, config='-c page_separator="" --psm 7')
-        if text != lastText :
+        if text[0] == "\"" :
+            if text not in grandmaText.readlines() :
+                grandmaText.write(text)
+        elif text not in lastStory :
             print(text.replace("\n", " "))
             storyText.write(text)
-            lastText = text
+            lastStory = text
 
 Initalize()
 
@@ -87,7 +94,7 @@ cookieClicker = threading.Thread(target=clickCookie, daemon=True)
 cookieClicker.start()
 
 while(True):
-    buyUpgrade()
+#    buyUpgrade()
     readStory()
 
 storyText.close()

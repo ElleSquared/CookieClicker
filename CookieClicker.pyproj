@@ -11,6 +11,7 @@
     <OutputPath>.</OutputPath>
     <Name>CookieClicker</Name>
     <RootNamespace>CookieClicker</RootNamespace>
+    <SuppressEnvironmentCreationPrompt>True</SuppressEnvironmentCreationPrompt>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
     <DebugSymbols>true</DebugSymbols>
