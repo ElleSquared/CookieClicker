@@ -13,7 +13,6 @@ from pynput import keyboard
 
 #### Image Modules ####
 from PIL import Image, ImageGrab
-#import cv2
 import pytesseract
 
 def on_press(key):
@@ -21,9 +20,8 @@ def on_press(key):
         print('esc pressed!')
         storyText.close()
         grandmaText.close()
-        newsText.close()
         sys.exit()
-        return False # Stop listener
+        return False
 
 def Initalize():
     listener = keyboard.Listener(on_press=on_press)
@@ -34,13 +32,12 @@ def Initalize():
     listener.start()
 
     ## Find Cookie Location
-    cookie = Image.open('Cookie.PNG')
     pyautogui.click('Cookie.PNG')
     global cookiePos
     cookiePos = pyautogui.position()
 
     ##Initalize
-    global lastStory, storyText, grandmaText, newsText
+    global lastStory, storyText, grandmaText
     storyText = open('story.txt', 'a')
     grandmaText = open('grandma.txt', 'a+')
     lastStory = ""
@@ -55,8 +52,7 @@ def clickCookie():
 
 #2. Click Golden Cookie 
 #3. Buy Upgrades
-def buyUpgrade():
-    Screen = ImageGrab.grab()
+def buyUpgrade(Screen):
     cropTop = 112
     cropLeft = 2240
     Screen = Screen.crop((cropLeft, cropTop, 2540, 1430))
@@ -67,14 +63,13 @@ def buyUpgrade():
     except:
         if (102, 255, 102) in pixels : #True if exists, False if it doesn't
             upgrades = numpy.argwhere((numpy.array(Screen)==[102, 255, 102]).all(axis=2))
-            index = numpy.argmax(upgrades, axis=0)[1]
+            index = numpy.argmax(upgrades, axis=0)[0]
             mouse.position = (cropLeft + upgrades[index][1], cropTop + upgrades[index][0])
             mouse.click(Button.left)
 
 #4. Read Text
-def readStory():
+def readStory(Screen):
     global lastStory
-    Screen = ImageGrab.grab()
     Screen = Screen.crop((890, 112, 2100, 200))
     pixels = [i for i in Screen.getdata()]
 
@@ -94,7 +89,8 @@ cookieClicker = threading.Thread(target=clickCookie, daemon=True)
 cookieClicker.start()
 
 while(True):
-#    buyUpgrade()
-    readStory()
+    Screen = ImageGrab.grab()
+    buyUpgrade(Screen)
+    readStory(Screen)
 
 storyText.close()
