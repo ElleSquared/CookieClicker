@@ -40,10 +40,12 @@ def Initalize():
     cookiePos = pyautogui.position()
 
     ##Initalize
-    global lastStory, storyText, grandmaText, newsText
+    global lastStory, lastNews, storyText, grandmaText, newsText
     storyText = open('story.txt', 'a')
     grandmaText = open('grandma.txt', 'a+')
+    newsText = open('news.txt', 'a')
     lastStory = ""
+    lastNews = ""
 
 #1. Click Big Cookie
 def clickCookie():
@@ -73,7 +75,7 @@ def buyUpgrade():
 
 #4. Read Text
 def readStory():
-    global lastStory
+    global lastStory, lastNews
     Screen = ImageGrab.grab()
     Screen = Screen.crop((890, 112, 2100, 200))
     pixels = [i for i in Screen.getdata()]
@@ -83,10 +85,14 @@ def readStory():
         if text[0] == "\"" :
             if text not in grandmaText.readlines() :
                 grandmaText.write(text)
-        elif text not in lastStory :
-            print(text.replace("\n", " "))
-            storyText.write(text)
-            lastStory = text
+        elif text not in (lastStory, lastNews) :
+            if text.startswith("News") :
+                newsText.write(text)
+                lastNews = text
+            else :
+                print(text.replace("\n", " "))
+                storyText.write(text)
+                lastStory = text
 
 Initalize()
 
@@ -94,7 +100,7 @@ cookieClicker = threading.Thread(target=clickCookie, daemon=True)
 cookieClicker.start()
 
 while(True):
-#    buyUpgrade()
+    buyUpgrade()
     readStory()
 
 storyText.close()
